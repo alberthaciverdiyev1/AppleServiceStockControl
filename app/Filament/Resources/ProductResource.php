@@ -7,6 +7,7 @@ use App\Filament\Resources\ProductResource\RelationManagers;
 use App\Models\Brand;
 use App\Models\Part;
 use App\Models\Product;
+use App\Models\ProductModel;
 use App\Models\Seller;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -25,16 +26,24 @@ class ProductResource extends Resource
     public static function form(Form $form): Form
     {
         $sellers = Seller::all()->pluck('name', 'id')->toArray();
-        $brands = Brand::all()->pluck('name', 'id')->toArray();
+        $brands = ProductModel::all()->pluck('name', 'id')->toArray();
+        $models = ProductModel::whereNull('deleted_at')
+            ->with(['brand:id,name',])
+            ->get()
+            ->mapWithKeys(function ($product) {
+                return [
+                    $product->id => $product->brand->name . ' - ' . $product->name
+                ];
+            })->toArray();
         $parts = Part::all()->pluck('name', 'id')->toArray();
         return $form
             ->schema([
-                Forms\Components\Select::make('brand_id')
-                    ->options($brands)
+                Forms\Components\Select::make('model_id')
+                    ->options($models)
                     ->required()
                     ->native(false)
                     ->afterStateUpdated(function ($state, $set) use ($form) {
-                        $parts = Part::where('brand_id', $state)->pluck('name', 'id')->toArray();
+                        $parts = Part::where('model_id', $state)->pluck('name', 'id')->toArray();
                         $set('part_id', null);
                         $set('parts', $parts);
                     }),
@@ -44,25 +53,22 @@ class ProductResource extends Resource
                     })
                     ->required()
                     ->native(false),
-                Forms\Components\Select::make('seller_id')
-                    ->options($sellers)
-                    ->required()
-                    ->native(false)
-                    ->label('Seller')
-                    ->placeholder('Select a seller'),
-                Forms\Components\TextInput::make('name')
-                    ->required(),
-                Forms\Components\TextInput::make('code')
-                    ->required(),
+                Forms\Components\TextInput::make('code'),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
+                    ->default(1)
                     ->numeric(),
                 Forms\Components\TextInput::make('buying_price')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->default(0.00)
+                    ->label('Alış Qiyməti'),
                 Forms\Components\TextInput::make('selling_price')
                     ->required()
-                    ->numeric(),
+                    ->numeric()
+                    ->default(0.00)
+                    ->label('Satış Qiyməti'),
+
             ]);
     }
 
@@ -70,7 +76,8 @@ class ProductResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('brand.name')
+                Tables\Columns\TextColumn::make('model_id')
+                    ->getStateUsing(fn ($record) => $record->part->brand->name . ' ' . $record->part->model->name)
                     ->sortable()
                     ->searchable()
                     ->label('Brend'),
@@ -78,19 +85,12 @@ class ProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Hisse'),
-                Tables\Columns\TextColumn::make('seller.name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Satici'),
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Ad'),
                 Tables\Columns\TextColumn::make('code')
                     ->searchable()
                     ->sortable()
                     ->label('Kod'),
-                Tables\Columns\TextColumn::make('quantity')
+                Tables\Columns\TextColumn::make('product')
+                    ->getStateUsing(fn ($record) => $record->quantityCount)
                     ->label('Say')
                     ->numeric()
                     ->sortable(),
@@ -114,6 +114,8 @@ class ProductResource extends Resource
                 //
             ])
             ->actions([
+
+                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([

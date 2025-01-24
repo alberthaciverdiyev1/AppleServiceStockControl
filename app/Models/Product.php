@@ -15,7 +15,7 @@ class Product extends Model
     protected $fillable = [
         'brand_id',
         'part_id',
-        'seller_id',
+        'model_id',
         'name',
         'code',
         'quantity',
@@ -23,13 +23,24 @@ class Product extends Model
         'selling_price'
     ];
 
-    public function brand(){
+    public function brand()
+    {
         return $this->belongsTo(Brand::class);
     }
-    public function part(){
+
+    public function part()
+    {
         return $this->belongsTo(Part::class);
     }
-    public function seller(){
-        return $this->belongsTo(Seller::class);
+    public function getQuantityAttributes()
+    {
+        $query = $this->belongsTo(Quantity::class);
+        $totalSales = $query->where('type', 'sale')->sum('quantity');
+        $totalPurchases = $query->where('type', 'purchase')->sum('quantity');
+        $totalOthers = $query->whereNull('type')->sum('quantity');
+
+        return ($totalPurchases + $totalOthers) - $totalSales;
     }
+
+
 }

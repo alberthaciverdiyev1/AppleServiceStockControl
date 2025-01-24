@@ -9,9 +9,12 @@ class Part extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'brand_id'];
+    protected $fillable = ['name', 'brand_id','model_id'];
 
     public function brand(){
         return $this->belongsTo(Brand::class);
+    }
+    public function model(){
+        return $this->belongsTo(ProductModel::class);
     }
 }

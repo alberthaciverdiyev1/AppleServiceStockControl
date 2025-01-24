@@ -6,6 +6,7 @@ use App\Filament\Resources\PartResource\Pages;
 use App\Filament\Resources\PartResource\RelationManagers;
 use App\Models\Brand;
 use App\Models\Part;
+use App\Models\ProductModel;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -26,15 +27,30 @@ class PartResource extends Resource
             ->schema([
                 Forms\Components\TextInput::make('name')
                     ->required(),
+
                 Forms\Components\Select::make('brand_id')
                     ->options(function () {
                         return Brand::all()->pluck('name', 'id')->toArray();
                     })
-                    ->label('Brand')
-                    ->placeholder('Select a brand')
+                    ->required()
+                    ->native(false)
+                    ->afterStateUpdated(function ($state, $set) {
+                        $models = ProductModel::where('brand_id', $state)
+                            ->pluck('name', 'id')
+                            ->toArray();
+                        $set('models', $models);
+                        $set('model_id', null);
+                    }),
 
+                Forms\Components\Select::make('model_id')
+                    ->options(function ($get) {
+                        return $get('models') ?: [];
+                    })
+                    ->required()
+                    ->native(false),
             ]);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -43,6 +59,9 @@ class PartResource extends Resource
                 Tables\Columns\TextColumn::make('name')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('brand.name')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('part.name')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('deleted_at')
@@ -62,6 +81,7 @@ class PartResource extends Resource
                 //
             ])
             ->actions([
+                Tables\Actions\DeleteAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
