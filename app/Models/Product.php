@@ -32,14 +32,16 @@ class Product extends Model
     {
         return $this->belongsTo(Part::class);
     }
-    public function getQuantityAttributes()
+    public function productCount()
     {
-        $query = $this->belongsTo(Quantity::class);
-        $totalSales = $query->where('type', 'sale')->sum('quantity');
-        $totalPurchases = $query->where('type', 'purchase')->sum('quantity');
-        $totalOthers = $query->whereNull('type')->sum('quantity');
+        $totalSales = Quantity::where('type', 'sale')->sum('quantity');
+        $totalPurchases = Quantity::where('type', 'purchase')->sum('quantity');
+        $totalOthers = Quantity::whereNull('type')->sum('quantity');
 
         return ($totalPurchases + $totalOthers) - $totalSales;
+    }
+    public function quantity(){
+       return $this->belongsTo(Quantity::class);
     }
 
 

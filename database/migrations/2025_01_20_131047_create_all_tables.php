@@ -54,10 +54,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('model_id')->constrained('brands')->cascadeOnDelete();
             $table->foreignId('part_id')->constrained('parts')->cascadeOnDelete();
-//            $table->foreignId('seller_id')->constrained('sellers')->cascadeOnDelete();
             $table->string('name');
             $table->string('code');
-            $table->integer('quantity');
             $table->float('buying_price');
             $table->float('selling_price');
             $table->softDeletes();

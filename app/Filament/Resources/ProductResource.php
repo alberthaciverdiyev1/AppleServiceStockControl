@@ -89,8 +89,8 @@ class ProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Kod'),
-                Tables\Columns\TextColumn::make('product')
-                    ->getStateUsing(fn ($record) => $record->quantityCount)
+                Tables\Columns\TextColumn::make('product.quantity_count')
+                    ->getStateUsing(fn ($record) => $record->productCount())
                     ->label('Say')
                     ->numeric()
                     ->sortable(),
