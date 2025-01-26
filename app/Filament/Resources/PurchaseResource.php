@@ -22,6 +22,7 @@ class PurchaseResource extends Resource
     protected static ?string $model = Purchase::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Alış';
 
     public static function form(Form $form): Form
     {
@@ -35,6 +36,12 @@ class PurchaseResource extends Resource
                                     $product->id => $product->part->brand->name . ' ' . $product->part->model->name . ' ' . $product->part->name,
                                 ];
                             })->toArray();
+                    })
+                    ->afterStateUpdated(function ($state, $set) use ($form) {
+                        $product = Product::find($state);
+                        if ($product) {
+                            $set('price', $product->buying_price);
+                        }
                     })
                     ->required()
                     ->native(false)
@@ -52,11 +59,18 @@ class PurchaseResource extends Resource
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(1),
+                Forms\Components\Select::make('pay_type')
+                    ->options([
+                        'cash' => 'Nağd',
+                        'debt' => 'Nisyə'
+                    ])->default('cash'),
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->default(0)
+                    ->default(function ($get) {
+                        return $get('price');
+                    })
                     ->prefix('₼'),
                 Forms\Components\Textarea::make('note'),
             ]);
@@ -66,8 +80,8 @@ class PurchaseResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('product_id')
-                    ->getStateUsing(fn($record) => $record->brand)
+                Tables\Columns\TextColumn::make('purchase.product_name')
+                    ->getStateUsing(fn($record) => $record->productName())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('seller_id')
                     ->getStateUsing(fn($record) => $record->seller->name)

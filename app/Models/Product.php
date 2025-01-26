@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-
     use HasFactory;
     use SoftDeletes;
 
@@ -18,7 +17,6 @@ class Product extends Model
         'model_id',
         'name',
         'code',
-        'quantity',
         'buying_price',
         'selling_price'
     ];
@@ -28,21 +26,27 @@ class Product extends Model
         return $this->belongsTo(Brand::class);
     }
 
+    public function model()
+    {
+        return $this->belongsTo(ProductModel::class);
+    }
+
     public function part()
     {
         return $this->belongsTo(Part::class);
     }
+
+    public function quantities()
+    {
+        return $this->hasMany(Quantity::class);
+    }
+
     public function productCount()
     {
-        $totalSales = Quantity::where('type', 'sale')->sum('quantity');
-        $totalPurchases = Quantity::where('type', 'purchase')->sum('quantity');
-        $totalOthers = Quantity::whereNull('type')->sum('quantity');
+        $totalSales = $this->quantities()->where('type', 'sale')->sum('quantity');
+        $totalPurchases = $this->quantities()->where('type', 'purchase')->sum('quantity');
+        $totalOthers = $this->quantities()->whereNull('type')->sum('quantity');
 
         return ($totalPurchases + $totalOthers) - $totalSales;
     }
-    public function quantity(){
-       return $this->belongsTo(Quantity::class);
-    }
-
-
 }

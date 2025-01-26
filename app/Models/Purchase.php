@@ -19,10 +19,18 @@ class Purchase extends Model
         'price',
         'note'
     ];
-    public function product(){
+
+    public function product()
+    {
         return $this->belongsTo(Product::class);
     }
-    public function seller(){
+
+    public function seller()
+    {
         return $this->belongsTo(Seller::class);
+    }
+    public function productName()
+    {
+        return $this->product->part->brand->name . ' ' . $this->product->part->model->name . ' ' . $this->product->part->name;
     }
 }

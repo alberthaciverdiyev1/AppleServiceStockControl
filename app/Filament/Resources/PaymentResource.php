@@ -2,9 +2,10 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\SellerResource\Pages;
-use App\Filament\Resources\SellerResource\RelationManagers;
-use App\Models\Seller;
+use App\Filament\Resources\PaymentResource\Pages;
+use App\Filament\Resources\PaymentResource\RelationManagers;
+use App\Models\Payment;
+use App\Models\Sale;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,25 +14,32 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class SellerResource extends Resource
+class PaymentResource extends Resource
 {
-    protected static ?string $model = Seller::class;
+    protected static ?string $model = Payment::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $label = 'Satıcılar';
+    protected static ?string $label = 'Ödənişlər';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\Select::make('sale_id')
+                    ->options(
+                        Sale::whereNull('deleted_at')
+                            ->firstOrFail()
+                    )
                     ->required(),
-                Forms\Components\TextInput::make('email')
-                    ->email(),
-                Forms\Components\TextInput::make('phone')
-                    ->tel(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
+                Forms\Components\TextInput::make('purchase_id')
+                    ->required()
+                    ->numeric(),
+                Forms\Components\TextInput::make('amount')
+                    ->required()
+                    ->numeric()
+                    ->default(0),
+                Forms\Components\TextInput::make('type')
+                    ->required(),
             ]);
     }
 
@@ -39,8 +47,16 @@ class SellerResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
-                    ->searchable(),
+                Tables\Columns\TextColumn::make('sale_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('purchase_id')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('amount')
+                    ->numeric()
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('type'),
                 Tables\Columns\TextColumn::make('deleted_at')
                     ->dateTime()
                     ->sortable()
@@ -53,10 +69,6 @@ class SellerResource extends Resource
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('email')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('phone')
-                    ->searchable(),
             ])
             ->filters([
                 //
@@ -81,9 +93,9 @@ class SellerResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListSellers::route('/'),
-            'create' => Pages\CreateSeller::route('/create'),
-            'edit' => Pages\EditSeller::route('/{record}/edit'),
+            'index' => Pages\ListPayments::route('/'),
+            'create' => Pages\CreatePayment::route('/create'),
+            'edit' => Pages\EditPayment::route('/{record}/edit'),
         ];
     }
 }

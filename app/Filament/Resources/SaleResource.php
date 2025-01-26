@@ -6,6 +6,7 @@ use App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource\RelationManagers;
 use App\Models\Product;
 use App\Models\Sale;
+use App\Models\Seller;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -19,41 +20,51 @@ class SaleResource extends Resource
     protected static ?string $model = Sale::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Satış';
+
 
     public static function form(Form $form): Form
     {
-        $products = Product::with(['brand', 'part'])
-            ->selectRaw('products.id, CONCAT(brands.name, " ", parts.name) AS product_label')
-            ->join('brands', 'brands.id', '=', 'products.brand_id')
-            ->join('parts', 'parts.id', '=', 'products.part_id')
-            ->pluck('product_label', 'id');
-
         return $form
             ->schema([
                 Forms\Components\Select::make('product_id')
-                    ->options($products)
+                    ->options(function () {
+                        return Product::whereNull('deleted_at')->get()
+                            ->mapWithKeys(function ($product) {
+                                return [
+                                    $product->id => ($product->part->brand->name ?? ($product->model->brand->name .' '. $product->model->name)) . ' ' .( $product->part->model->name ?? '') . ' ' . ($product->part->name ?? ''),
+                                ];
+                            })->toArray();
+                    })
+                    ->afterStateUpdated(function ($state, $set) use ($form) {
+                        $product = Product::find($state);
+                        if ($product) {
+                            $set('price', $product->selling_price);
+                        }
+                    })
                     ->required()
                     ->native(false)
-                    ->label('Məhsul adı'),
-
-                Forms\Components\TextInput::make('seller_id')
-                    ->required()
-                    ->numeric()
-                ->label('Satıcı adı'),
+                    ->searchable()
+                    ->preload(),
+                Forms\Components\TextInput::make('name')
+                    ->label('Müştəri')
+                    ->required(),
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric()
                     ->default(0),
+                Forms\Components\Select::make('pay_type')
+                    ->options([
+                        'cash' => 'Nağd',
+                        'debt' => 'Nisyə'
+                    ])->default('cash'),
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->default(0)
-                    ->prefix('₼')
-                ->label('Qiymət'),
-                Forms\Components\Textarea::make('note')
-                ->label('Əlave qeyd')
-                ->columnSpan(2)
-                ,
+                    ->default(function ($get) {
+                        return $get('price');
+                    })->prefix('₼'),
+                Forms\Components\Textarea::make('note'),
             ]);
     }
 
@@ -62,28 +73,22 @@ class SaleResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('product_id')
-                    ->numeric()
+                    ->getStateUsing(fn($record) => $record->productName())
+                    ->searchable()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('seller_id')
-                    ->numeric()
-                    ->sortable(),
+                Tables\Columns\TextColumn::make('name')
+                    ->sortable()
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('quantity')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('price')
-                    ->money()
+                    ->money('azn')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('note')
+                    ->limit(50)
                     ->searchable(),
-                Tables\Columns\TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

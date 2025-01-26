@@ -22,6 +22,7 @@ class ProductResource extends Resource
     protected static ?string $model = Product::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Məhsullar';
 
     public static function form(Form $form): Form
     {
@@ -51,10 +52,11 @@ class ProductResource extends Resource
                     ->options(function ($get) {
                         return $get('parts') ?: [];
                     })
-                    ->required()
+                    //->required()
                     ->native(false),
                 Forms\Components\TextInput::make('code'),
                 Forms\Components\TextInput::make('quantity')
+                    ->label('Say')
                     ->required()
                     ->default(1)
                     ->numeric(),
@@ -77,7 +79,7 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('model_id')
-                    ->getStateUsing(fn ($record) => $record->part->brand->name . ' ' . $record->part->model->name)
+                    ->getStateUsing(fn($record) => ($record->part->brand->name ?? ''). ' ' . ($record->part->model->name ?? ''))
                     ->sortable()
                     ->searchable()
                     ->label('Brend'),
@@ -90,7 +92,7 @@ class ProductResource extends Resource
                     ->sortable()
                     ->label('Kod'),
                 Tables\Columns\TextColumn::make('product.quantity_count')
-                    ->getStateUsing(fn ($record) => $record->productCount())
+                    ->getStateUsing(fn($record) => $record->productCount())
                     ->label('Say')
                     ->numeric()
                     ->sortable(),

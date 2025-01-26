@@ -19,6 +19,8 @@ class ProductModelResource extends Resource
     protected static ?string $model = ProductModel::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $label = 'Telefon Modelləri';
+    protected static ?string $navigationGroup = 'Parçalar';
 
     public static function form(Form $form): Form
     {

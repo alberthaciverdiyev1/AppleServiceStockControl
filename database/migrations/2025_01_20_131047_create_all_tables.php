@@ -52,8 +52,8 @@ return new class extends Migration
         // Creating 'products' table (Fixed foreign key constraint)
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('model_id')->constrained('brands')->cascadeOnDelete();
-            $table->foreignId('part_id')->constrained('parts')->cascadeOnDelete();
+            $table->foreignId('model_id')->constrained('product_models')->cascadeOnDelete();
+            $table->foreignId('part_id')->constrained('parts')->cascadeOnDelete()->default(0);
             $table->string('name');
             $table->string('code');
             $table->float('buying_price');
@@ -74,6 +74,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->string('name')->nullable();
             $table->integer('quantity')->default(0);
+            $table->enum('pay_type',['cash','debt'])->default('cash');
             $table->double('price')->default(0);
             $table->string('note')->nullable();
             $table->softDeletes();
@@ -86,6 +87,7 @@ return new class extends Migration
             $table->foreignId('product_id')->constrained('products');
             $table->foreignId('seller_id')->constrained('sellers')->onDelete('cascade');
             $table->integer('quantity')->default(0);
+            $table->enum('pay_type',['cash','debt'])->default('cash');
             $table->double('price')->default(0);
             $table->string('note')->nullable();
             $table->softDeletes();
