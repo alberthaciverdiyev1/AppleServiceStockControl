@@ -13,4 +13,13 @@ class Payment extends Model
         'type',
         'sale_or_purchase'
     ];
+    public function sale(){
+        return $this->belongsTo(Sale::class);
+    }
+    public function purchase(){
+        return $this->belongsTo(Purchase::class);
+    }
+    public function product(){
+        return sale()->brand;
+    }
 }

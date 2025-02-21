@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\PaymentResource\Pages;
 use App\Filament\Resources\PaymentResource\RelationManagers;
 use App\Models\Payment;
+use App\Models\Product;
 use App\Models\Sale;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -21,37 +22,27 @@ class PaymentResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
     protected static ?string $label = 'Ödənişlər';
 
+    public static function canCreate(): bool
+    {
+        return false;
+    }
+
     public static function form(Form $form): Form
     {
         return $form
-            ->schema([
-                Forms\Components\Select::make('sale_id')
-                    ->options(
-                        Sale::whereNull('deleted_at')
-                            ->firstOrFail()
-                    )
-                    ->required(),
-                Forms\Components\TextInput::make('purchase_id')
-                    ->required()
-                    ->numeric(),
-                Forms\Components\TextInput::make('amount')
-                    ->required()
-                    ->numeric()
-                    ->default(0),
-                Forms\Components\TextInput::make('type')
-                    ->required(),
-            ]);
+            ->schema([]);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('sale_id')
-                    ->numeric()
+                Tables\Columns\TextColumn::make('sale')
+                    ->getStateUsing(fn($record) => ($record->sale?->name))
                     ->sortable(),
-                Tables\Columns\TextColumn::make('purchase_id')
-                    ->numeric()
+
+                Tables\Columns\TextColumn::make('purchase')
+                    ->getStateUsing(fn($record) => $record->purchase?->product_id)
                     ->sortable(),
                 Tables\Columns\TextColumn::make('amount')
                     ->numeric()
@@ -73,12 +64,13 @@ class PaymentResource extends Resource
             ->filters([
                 //
             ])
+            ->defaultSort('created_at', 'desc')
             ->actions([
-                Tables\Actions\EditAction::make(),
+               // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                  //  Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
     }

@@ -112,6 +112,7 @@ class ProductResource extends Resource
 
             ])
             ->defaultSort('created_at', 'desc')
+            ->defaultSort('quantity', 'desc')
             ->filters([
                 //
             ])
