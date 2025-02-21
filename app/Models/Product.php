@@ -17,9 +17,18 @@ class Product extends Model
         'model_id',
         'name',
         'code',
+        'quantity',
         'buying_price',
         'selling_price'
     ];
+
+//    public static function boot()
+//    {
+//        parent::boot();
+//        static::updating(function ($model) {
+//
+//        });
+//    }
 
     public function brand()
     {

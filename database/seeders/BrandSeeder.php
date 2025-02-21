@@ -14,26 +14,7 @@ class BrandSeeder extends Seeder
     public function run(): void
     {
         DB::table('brands')->insert([
-            ['name' => 'Apple'],
-            ['name' => 'Samsung'],
-            ['name' => 'Huawei'],
-            ['name' => 'Xiaomi'],
-            ['name' => 'Google'],
-            ['name' => 'Sony'],
-            ['name' => 'LG'],
-            ['name' => 'Nokia'],
-            ['name' => 'Motorola'],
-            ['name' => 'OnePlus'],
-            ['name' => 'Oppo'],
-            ['name' => 'Realme'],
-            ['name' => 'Asus'],
-            ['name' => 'HTC'],
-            ['name' => 'Lenovo'],
-            ['name' => 'ZTE'],
-            ['name' => 'Vivo'],
-            ['name' => 'Alcatel'],
-            ['name' => 'Meizu'],
-            ['name' => 'Sharp'],
+            ['name' => 'Apple']
         ]);
     }
 }

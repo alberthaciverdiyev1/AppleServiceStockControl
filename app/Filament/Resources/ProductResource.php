@@ -91,8 +91,7 @@ class ProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Kod'),
-                Tables\Columns\TextColumn::make('product.quantity_count')
-                    ->getStateUsing(fn($record) => $record->productCount())
+                Tables\Columns\TextColumn::make('quantity')
                     ->label('Say')
                     ->numeric()
                     ->sortable(),
@@ -112,6 +111,7 @@ class ProductResource extends Resource
                     ->label('Yaradilma Tarixi'),
 
             ])
+            ->defaultSort('created_at', 'desc')
             ->filters([
                 //
             ])
@@ -130,7 +130,7 @@ class ProductResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+          //  RelationManagers\IdRelationManager::class
         ];
     }
 

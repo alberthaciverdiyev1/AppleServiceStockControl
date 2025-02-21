@@ -13,10 +13,11 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sale_id')->constrained('sales')->cascadeOnDelete();
-            $table->foreignId('purchase_id')->constrained('purchases')->cascadeOnDelete();
+            $table->string('sale_id')->nullable();
+            $table->string('purchase_id')->nullable();
             $table->double('amount')->default(0);
             $table->enum('type', ['cash', 'debt'])->default('cash');
+            $table->enum('sale_or_purchase', ['sale', 'purchase'])->default('sale');
             $table->softDeletes();
             $table->timestamps();
         });

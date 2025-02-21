@@ -14,26 +14,32 @@ class ModelSeeder extends Seeder
     public function run(): void
     {
         $models = [
-            'Apple' => ['iPhone 14', 'iPhone 13', 'iPhone 12'],
-            'Samsung' => ['Galaxy S23', 'Galaxy S22', 'Galaxy Note 20'],
-            'Huawei' => ['P50', 'P40', 'Mate 40'],
-            'Xiaomi' => ['Mi 11', 'Redmi Note 11', 'Poco F3'],
-            'Google' => ['Pixel 7', 'Pixel 6', 'Pixel 5'],
-            'Sony' => ['Xperia 1 III', 'Xperia 5 II', 'Xperia 10 III'],
-            'LG' => ['V60 ThinQ', 'G8X ThinQ', 'Velvet'],
-            'Nokia' => ['Nokia 8.3', 'Nokia 5.4', 'Nokia 3.4'],
-            'Motorola' => ['Edge 20', 'Moto G Power', 'Moto G Stylus'],
-            'OnePlus' => ['OnePlus 9', 'OnePlus 8', 'OnePlus Nord'],
-            'Oppo' => ['Find X5', 'Reno 7', 'A95'],
-            'Realme' => ['Realme GT 2', 'Realme 9 Pro', 'Realme 8 Pro'],
-            'Asus' => ['ZenFone 9', 'ZenFone 8', 'ROG Phone 5'],
-            'HTC' => ['U12+', 'Desire 20 Pro', 'Wildfire E2'],
-            'Lenovo' => ['Legion Phone Duel', 'K12 Note', 'Z6 Pro'],
-            'ZTE' => ['Axon 20 5G', 'Blade V2020', 'Axon 10 Pro'],
-            'Vivo' => ['V21 5G', 'V15 Pro', 'X60 Pro'],
-            'Alcatel' => ['Alcatel 3X', 'Alcatel 1S', 'Alcatel 1V'],
-            'Meizu' => ['Meizu 18', 'Meizu 17', 'Meizu 16T'],
-            'Sharp' => ['Aquos R6', 'Aquos Sense 5G', 'Aquos Zero 5G'],
+            'Apple' => [
+                'iPhone 15 Pro Max', 'iPhone 15 Pro', 'iPhone 15 Plus', 'iPhone 15',
+                'iPhone 14 Pro Max', 'iPhone 14 Pro', 'iPhone 14 Plus', 'iPhone 14',
+                'iPhone 13 Pro Max', 'iPhone 13 Pro', 'iPhone 13 mini', 'iPhone 13',
+                'iPhone 12 Pro Max', 'iPhone 12 Pro', 'iPhone 12 mini', 'iPhone 12',
+                'iPhone 11 Pro Max', 'iPhone 11 Pro', 'iPhone 11',
+                'iPhone SE (3rd generation)', 'iPhone SE (2nd generation)',
+                'iPhone XS Max', 'iPhone XS', 'iPhone XR', 'iPhone X',
+                'iPhone 8 Plus', 'iPhone 8', 'iPhone 7 Plus', 'iPhone 7',
+                'iPhone 6s Plus', 'iPhone 6s', 'iPhone 6 Plus', 'iPhone 6', 'iPhone 5s', 'iPhone 5', 'iPhone 4', 'iPhone 3g',
+
+                'iPad Pro 12.9-inch (6th generation)', 'iPad Pro 11-inch (4th generation)',
+                'iPad Air (5th generation)', 'iPad Air (4th generation)',
+                'iPad (10th generation)', 'iPad (9th generation)',
+                'iPad mini (6th generation)', 'iPad mini (5th generation)',
+
+                'Apple Watch Ultra 2', 'Apple Watch Ultra',
+                'Apple Watch Series 9', 'Apple Watch Series 8',
+                'Apple Watch SE (2nd generation)', 'Apple Watch SE (1st generation)',
+
+                'AirPods Max', 'AirPods Pro (2nd generation)', 'AirPods Pro (1st generation)',
+                'AirPods (3rd generation)', 'AirPods (2nd generation)',
+
+                'Apple Pencil (USB-C)', 'Apple Pencil (2nd generation)', 'Apple Pencil (1st generation)',
+                'Magic Keyboard', 'Magic Mouse', 'Magic Trackpad'
+            ]
         ];
 
         foreach ($models as $brandName => $modelNames) {

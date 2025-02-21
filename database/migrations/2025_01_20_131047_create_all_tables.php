@@ -56,6 +56,7 @@ return new class extends Migration
             $table->foreignId('part_id')->constrained('parts')->cascadeOnDelete()->default(0);
             $table->string('name');
             $table->string('code');
+            $table->integer('quantity')->default(0);
             $table->float('buying_price');
             $table->float('selling_price');
             $table->softDeletes();

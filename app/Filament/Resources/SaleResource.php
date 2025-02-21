@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SaleResource\Pages;
 use App\Filament\Resources\SaleResource\RelationManagers;
+use App\Http\Helpers\PriceHelper;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Seller;
@@ -29,41 +30,51 @@ class SaleResource extends Resource
             ->schema([
                 Forms\Components\Select::make('product_id')
                     ->options(function () {
-                        return Product::whereNull('deleted_at')->get()
-                            ->mapWithKeys(function ($product) {
-                                return [
-                                    $product->id => ($product->part->brand->name ?? ($product->model->brand->name .' '. $product->model->name)) . ' ' .( $product->part->model->name ?? '') . ' ' . ($product->part->name ?? ''),
-                                ];
-                            })->toArray();
+                        return Product::whereNull('deleted_at')
+                            ->where('quantity', '>', 0)
+                            ->with(['part.brand', 'model.brand', 'part.model'])
+                            ->get()
+                            ->mapWithKeys(fn($product) => [
+                                $product->id => ($product->part->brand->name ?? ($product->model->brand->name . ' ' . $product->model->name)) . ' ' . ($product->part->model->name ?? '') . ' ' . ($product->part->name ?? ''),
+                            ]);
                     })
-                    ->afterStateUpdated(function ($state, $set) use ($form) {
-                        $product = Product::find($state);
-                        if ($product) {
-                            $set('price', $product->selling_price);
-                        }
-                    })
+                    ->live() // Seçim değiştiğinde anında güncelleme yap
+                    ->afterStateUpdated(fn($state, $set, $get) => $set('price', PriceHelper::calculatePrice($get('product_id'), $get('quantity'), $get('pay_type')))
+                    )
                     ->required()
                     ->native(false)
                     ->searchable()
                     ->preload(),
+
                 Forms\Components\TextInput::make('name')
                     ->label('Müştəri')
                     ->required(),
+
                 Forms\Components\TextInput::make('quantity')
                     ->required()
                     ->numeric()
-                    ->default(0),
+                    ->default(1)
+                    ->live() // Değer değiştiğinde anında güncellensin
+                    ->afterStateUpdated(fn($state, $set, $get) => $set('price', PriceHelper::calculatePrice($get('product_id'), $state, $get('pay_type')))
+                    ),
+
                 Forms\Components\Select::make('pay_type')
                     ->options([
                         'cash' => 'Nağd',
                         'debt' => 'Nisyə'
-                    ])->default('cash'),
+                    ])
+                    ->default('cash')
+                    ->live() // Seçim değiştiğinde anında güncelleme yap
+                    ->afterStateUpdated(fn($state, $set, $get) => $set('price', PriceHelper::calculatePrice($get('product_id'), $get('quantity'), $state))
+                    ),
+
                 Forms\Components\TextInput::make('price')
                     ->required()
                     ->numeric()
-                    ->default(function ($get) {
-                        return $get('price');
-                    })->prefix('₼'),
+                    ->live() // Fiyat değiştiğinde anında yansıt
+                    ->default(fn($get) => PriceHelper::calculatePrice($get('product_id'), $get('quantity'), $get('pay_type')))
+                    ->prefix('₼'),
+
                 Forms\Components\Textarea::make('note'),
             ]);
     }

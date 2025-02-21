@@ -26,16 +26,46 @@ class PurchaseResource extends Resource
 
     public static function form(Form $form): Form
     {
+//        Forms\Components\Select::make('product_id')
+//            ->options(function () {
+//                $options = [];
+//                Product::whereNull('deleted_at')
+//                    ->with(['part.brand', 'model.brand', 'part.model'])
+//                    ->take(100)
+//                    ->get()
+//                    ->each(function ($product) use (&$options) {
+//                        $options[$product->id] = ($product->part->brand->name ?? ($product->model->brand->name .' '. $product->model->name)) . ' ' .( $product->part->model->name ?? '') . ' ' . ($product->part->name ?? '');
+//                    });
+//
+//                return $options;
+//            })
+//            ->afterStateUpdated(function ($state, $set) use ($form) {
+//                $product = Product::find($state);
+//                if ($product) {
+//                    $set('price', $product->buying_price);
+//                }
+//            })
+//            ->required()
+//
+//            ->native()
+//            ->searchable(),  //
         return $form
             ->schema([
                 Forms\Components\Select::make('product_id')
                     ->options(function () {
-                        return Product::whereNull('deleted_at')->get()
-                            ->mapWithKeys(function ($product) {
-                                return [
-                                    $product->id => $product->part->brand->name . ' ' . $product->part->model->name . ' ' . $product->part->name,
-                                ];
-                            })->toArray();
+                        $options = [];
+                        Product::whereNull('deleted_at')
+                            ->with(['part.brand', 'model.brand', 'part.model'])
+                            ->take(2000)
+                            ->get()
+                            ->each(function ($product) use (&$options) {
+                                $label = ($product->part->brand->name ?? ($product->model->brand->name . ' ' . $product->model->name)) . ' ' . ($product->part->model->name ?? '') . ' ' . ($product->part->name ?? '');
+                                if (!in_array($label, $options)) {
+                                    $options[$product->id] = $label;
+                                }
+                            });
+
+                        return $options;
                     })
                     ->afterStateUpdated(function ($state, $set) use ($form) {
                         $product = Product::find($state);
@@ -44,9 +74,9 @@ class PurchaseResource extends Resource
                         }
                     })
                     ->required()
-                    ->native(false)
-                    ->searchable()
-                    ->preload(),
+                    ->native()
+                    ->searchable(),  //
+
                 Forms\Components\Select::make('seller_id')
                     ->options(function () {
                         return Seller::whereNull('deleted_at')->pluck('name', 'id')->toArray();
