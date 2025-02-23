@@ -9,10 +9,12 @@ use App\Models\Part;
 use App\Models\Product;
 use App\Models\Purchase;
 use App\Models\Seller;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -131,7 +133,24 @@ class PurchaseResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Filter::make('created_at')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')
+                            ->default(Carbon::now()->subMonth()->toDateString()),
+                        \Filament\Forms\Components\DatePicker::make('to')
+                            ->default(Carbon::now()->toDateString()),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn($q) => $q->whereDate('created_at', '>=', $data['from']))
+                            ->when($data['to'], fn($q) => $q->whereDate('created_at', '<=', $data['to']));
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['from'] && $data['to']) {
+                            return "Tarih: {$data['from']} - {$data['to']}";
+                        }
+                        return null;
+                    }),
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([

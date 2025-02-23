@@ -8,10 +8,12 @@ use App\Http\Helpers\PriceHelper;
 use App\Models\Product;
 use App\Models\Sale;
 use App\Models\Seller;
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -106,10 +108,27 @@ class SaleResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->filters([
-                //
+                Filter::make('created_at')
+                    ->form([
+                        \Filament\Forms\Components\DatePicker::make('from')
+                            ->default(Carbon::now()->subMonth()->toDateString()),
+                        \Filament\Forms\Components\DatePicker::make('to')
+                            ->default(Carbon::now()->toDateString()),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query
+                            ->when($data['from'], fn($q) => $q->whereDate('created_at', '>=', $data['from']))
+                            ->when($data['to'], fn($q) => $q->whereDate('created_at', '<=', $data['to']));
+                    })
+                    ->indicateUsing(function (array $data): ?string {
+                        if ($data['from'] && $data['to']) {
+                            return "Tarih: {$data['from']} - {$data['to']}";
+                        }
+                        return null;
+                    }),
             ])
             ->actions([
-               // Tables\Actions\EditAction::make(),
+                // Tables\Actions\EditAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
