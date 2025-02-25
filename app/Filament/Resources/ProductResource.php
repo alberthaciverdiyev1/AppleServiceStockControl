@@ -79,7 +79,7 @@ class ProductResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('model_id')
-                    ->getStateUsing(fn($record) => ($record->part->brand->name ?? ''). ' ' . ($record->part->model->name ?? ''))
+                    ->getStateUsing(fn($record) => ($record->part->brand->name ?? '') . ' ' . ($record->part->model->name ?? ''))
                     ->sortable()
                     ->searchable()
                     ->label('Brend'),
@@ -102,22 +102,21 @@ class ProductResource extends Resource
                 Tables\Columns\TextColumn::make('selling_price')
                     ->numeric()
                     ->sortable()
-                    ->label('Satis Qiymeti')
-                    ->sortable(),
+                    ->label('Satis Qiymeti'),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true)
                     ->label('Yaradilma Tarixi'),
-
             ])
             ->defaultSort('created_at', 'desc')
             ->defaultSort('quantity', 'desc')
             ->filters([
-                //
+                Tables\Filters\Filter::make('quantity_1_ve_kicik')
+                    ->label('Stokda olanlar')
+                    ->query(fn (Builder $query) => $query->where('quantity', '>', 0)),
             ])
             ->actions([
-
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\EditAction::make(),
             ])
